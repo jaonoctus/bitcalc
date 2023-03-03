@@ -1,4 +1,10 @@
 <script lang="ts" setup>
+import BigNumber from 'bignumber.js'
+
+BigNumber.config({
+  ROUNDING_MODE: BigNumber.ROUND_DOWN
+})
+
 useHead({
   title: 'Bitcoin Price',
   htmlAttrs: {
@@ -26,9 +32,11 @@ type CoingeckoResponse = {
 const { coingeckoURL } = useAppConfig()
 const { data } = await useFetch<CoingeckoResponse>(coingeckoURL)
 const rates = data.value?.rates
+const updatedAt = new Date()
 
 const fiatDigits = ref<Number[]>([])
-const sats = ref(0)
+const satsNumber = ref(0)
+const isSats = ref(true)
 
 const fiatNumber = computed(() => {
   const digits = fiatDigits.value
@@ -39,7 +47,12 @@ const fiatNumber = computed(() => {
 })
 
 const fiat = computed(() => {
-  return `${fiatNumber.value}`
+  return fiatNumber.value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+})
+
+const sats = computed(() => {
+  const maximumFractionDigits = isSats.value ? 0 : 8
+  return satsNumber.value.toLocaleString(undefined, { maximumFractionDigits })
 })
 
 const keypad = [
@@ -52,13 +65,13 @@ const keypad = [
   '7',
   '8',
   '9',
-  'C',
+  'c',
   '0',
   '<',
 ]
 
 function updateNumber (key: string) {
-  if (key === 'C') {
+  if (key === 'c') {
     fiatDigits.value = []
     return
   }
@@ -73,12 +86,20 @@ function updateNumber (key: string) {
 
 function updatePrice () {
   if (fiatNumber.value === 0) {
-    sats.value = 0
+    satsNumber.value = 0
     return
   }
 
   if (rates) {
-    sats.value = Math.round(fiatNumber.value / rates.brl.value * rates.sats.value)
+    const fiatValue = new BigNumber(fiatNumber.value)
+    const fiatPrice = new BigNumber(rates.brl.value)
+    let satsValue = fiatValue.dividedBy(fiatPrice).decimalPlaces(8)
+
+    if (isSats.value) {
+      satsValue = satsValue.times(1e8)
+    }
+
+    satsNumber.value = satsValue.toNumber()
   }
 }
 
@@ -86,18 +107,56 @@ function onKey (key: string) {
   updateNumber(key)
   updatePrice()
 }
+
+function toggleSats() {
+  isSats.value = !isSats.value
+  updatePrice()
+}
+
+function onInput(event: any) {
+  console.log(event)
+}
+
+onMounted(() => {
+  window.addEventListener('keyup', (event: KeyboardEvent) => {
+    let key = event.key
+
+    if (key === 'Backspace') {
+      key = '<'
+    }
+
+    if (keypad.includes(key.toLowerCase())) {
+      onKey(key)
+    }
+  })
+})
 </script>
 
 <template>
-  <main class="grid h-screen place-items-center bg-slate-900 py-24 px-6 sm:py-32 lg:px-8">
+  <main @input.native="onInput" class="grid h-screen place-items-center bg-slate-900 py-24 px-6 sm:py-32 lg:px-8">
     <form class="text-white">
-      <div class="text-center">
-        <div>SATS</div>
-        <div>{{ sats }}</div>
+      <div class="text-center mb-4">
+        <div class="flex justify-center gap-2 mb-4">
+          <button
+            :class="{ 'bg-orange-400 text-slate-900 border-slate-700': isSats }"
+            @click.prevent="toggleSats"
+            class="px-4 border rounded-full"
+          >
+            SATS
+          </button>
+          <button
+          :class="{ 'bg-orange-400 text-slate-900 border-slate-700': !isSats }"
+            @click.prevent="toggleSats"
+            class="px-4 border rounded-full"
+          >
+            BTC
+        </button>
+        </div>
+        <div class="text-3xl">{{ sats }}</div>
       </div>
-      <div class="text-center">
+      <div class="text-center mb-4">
         <div>BRL</div>
-        <div>{{ fiat }}</div>
+        <div class="text-3xl">{{ fiat }}</div>
       </div>
       <div class="keypad">
         <button
@@ -109,6 +168,9 @@ function onKey (key: string) {
         </button>
       </div>
     </form>
+    <div>
+      <span class="text-slate-500 text-sm">last price update: {{ updatedAt.toLocaleString() }}</span>
+    </div>
   </main>
 </template>
 
