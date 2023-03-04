@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import BigNumber from 'bignumber.js'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import dayjs from 'dayjs'
 
 BigNumber.config({
   ROUNDING_MODE: BigNumber.ROUND_DOWN
@@ -15,24 +17,10 @@ useHead({
   }
 })
 
-type Rate = {
-  name: string,
-  unit: string,
-  value: number,
-  type: 'fiat' | 'crypto'
-}
-
-type CoingeckoResponse = {
-  rates: {
-    brl: Rate,
-    sats: Rate
-  }
-}
-
-const { coingeckoURL } = useAppConfig()
-const { data } = await useFetch<CoingeckoResponse>(coingeckoURL)
-const rates = data.value?.rates
-const updatedAt = new Date()
+const { data: apiRatesData } = await useFetch('/api/rates')
+const rates = apiRatesData.value?.rates
+dayjs.extend(relativeTime)
+const updatedAt = ref(dayjs(apiRatesData.value?.updatedAt).fromNow())
 
 const fiatDigits = ref<Number[]>([])
 const satsNumber = ref(0)
@@ -129,6 +117,11 @@ onMounted(() => {
       onKey(key)
     }
   })
+
+  setInterval(() => {
+    console.log('update price')
+    updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
+  }, 60000)
 })
 </script>
 
@@ -169,7 +162,7 @@ onMounted(() => {
       </div>
     </form>
     <div>
-      <span class="text-slate-500 text-sm">last price update: {{ updatedAt.toLocaleString() }}</span>
+      <span class="text-slate-500 text-sm">last price update: {{ updatedAt }}.</span>
     </div>
   </main>
 </template>
