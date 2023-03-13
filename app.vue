@@ -17,7 +17,11 @@ useHead({
   }
 })
 
-const { data: apiRatesData } = await useFetch('/api/rates')
+const {
+  data: apiRatesData,
+  pending: isLoading,
+  error: hasError
+} = await useLazyFetch('/api/rates')
 const rates = apiRatesData.value?.rates
 dayjs.extend(relativeTime)
 const updatedAt = ref(dayjs(apiRatesData.value?.updatedAt).fromNow())
@@ -126,8 +130,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <main @input.native="onInput" class="grid h-screen place-items-center bg-slate-900 py-24 px-6 sm:py-32 lg:px-8">
-    <form class="text-white">
+  <main
+    v-if="!isLoading"
+    @input.native="onInput"
+    class="grid h-screen place-items-center bg-slate-900 py-24 px-6 sm:py-32 lg:px-8"
+  >
+    <div v-if="hasError">
+      <h1 class="text-white">Couldn't fetch bitcoin rates atm. Come back later.</h1>
+    </div>
+    <div v-else>
+      <form class="text-white">
       <div class="text-center mb-4">
         <div class="flex justify-center gap-2 mb-4">
           <button
@@ -161,8 +173,9 @@ onMounted(() => {
         </button>
       </div>
     </form>
-    <div>
+    <div class="text-center">
       <span class="text-slate-500 text-sm">last price update: {{ updatedAt }}.</span>
+    </div>
     </div>
   </main>
 </template>
