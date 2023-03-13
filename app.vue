@@ -26,25 +26,27 @@ const rates = apiRatesData.value?.rates
 dayjs.extend(relativeTime)
 const updatedAt = ref(dayjs(apiRatesData.value?.updatedAt).fromNow())
 
-const fiatDigits = ref<Number[]>([])
-const satsNumber = ref(0)
-const isSats = ref(true)
+const isTypingInFiat = ref(false)
 
-const fiatNumber = computed(() => {
-  const digits = fiatDigits.value
+const inputDigits = ref<Number[]>([])
+const inputNumber = computed(() => {
+  const digits = inputDigits.value
   if (digits.length === 0) {
     return 0
   }
   return Number(digits.join(''))
 })
 
+const isSats = ref(true)
+const fiatNumber = ref(0)
 const fiat = computed(() => {
   return fiatNumber.value.toLocaleString(undefined, { maximumFractionDigits: 2 })
 })
-
+const satsNumber = ref(0)
 const sats = computed(() => {
   const maximumFractionDigits = isSats.value ? 0 : 8
-  return satsNumber.value.toLocaleString(undefined, { maximumFractionDigits })
+  const minimumFractionDigits = isSats.value ? 0 : 8
+  return satsNumber.value.toLocaleString(undefined, { maximumFractionDigits, minimumFractionDigits })
 })
 
 const keypad = [
@@ -64,34 +66,49 @@ const keypad = [
 
 function updateNumber (key: string) {
   if (key === 'c') {
-    fiatDigits.value = []
+    inputDigits.value = []
     return
   }
 
   if (key === '<') {
-    fiatDigits.value.pop()
+    inputDigits.value.pop()
     return
   }
 
-  fiatDigits.value.push(Number(key))
+  inputDigits.value.push(Number(key))
 }
 
 function updatePrice () {
-  if (fiatNumber.value === 0) {
+  if (inputNumber.value === 0) {
     satsNumber.value = 0
+    fiatNumber.value = 0
     return
   }
 
   if (rates) {
-    const fiatValue = new BigNumber(fiatNumber.value)
     const fiatPrice = new BigNumber(rates.brl.value)
-    let satsValue = fiatValue.dividedBy(fiatPrice).decimalPlaces(8)
 
-    if (isSats.value) {
-      satsValue = satsValue.times(1e8)
+    if (isTypingInFiat.value) {
+      fiatNumber.value = inputNumber.value
+      const fiatValue = new BigNumber(fiatNumber.value)
+      let satsValue = fiatValue.dividedBy(fiatPrice).decimalPlaces(8)
+
+      if (isSats.value) {
+        satsValue = satsValue.times(1e8)
+      }
+
+      satsNumber.value = satsValue.toNumber()
+    } else {
+      let satsValue = new BigNumber(inputNumber.value)
+
+      if (!isSats.value) {
+        satsValue = satsValue.dividedBy(1e8)
+      }
+
+      satsNumber.value = satsValue.toNumber()
+      const bitcoinNumber = new BigNumber(inputNumber.value).dividedBy(1e8)
+      fiatNumber.value = fiatPrice.times(bitcoinNumber).toNumber()
     }
-
-    satsNumber.value = satsValue.toNumber()
   }
 }
 
@@ -103,10 +120,6 @@ function onKey (key: string) {
 function toggleSats() {
   isSats.value = !isSats.value
   updatePrice()
-}
-
-function onInput(event: any) {
-  console.log(event)
 }
 
 onMounted(() => {
@@ -123,7 +136,6 @@ onMounted(() => {
   })
 
   setInterval(() => {
-    console.log('update price')
     updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
   }, 60000)
 })
@@ -132,7 +144,6 @@ onMounted(() => {
 <template>
   <main
     v-if="!isLoading"
-    @input.native="onInput"
     class="grid h-screen place-items-center bg-slate-900 py-24 px-6 sm:py-32 lg:px-8"
   >
     <div v-if="hasError">
@@ -150,18 +161,30 @@ onMounted(() => {
             SATS
           </button>
           <button
-          :class="{ 'bg-orange-400 text-slate-900 border-slate-700': !isSats }"
+            :class="{ 'bg-orange-400 text-slate-900 border-slate-700': !isSats }"
             @click.prevent="toggleSats"
             class="px-4 border rounded-full"
           >
             BTC
         </button>
         </div>
-        <div class="text-3xl">{{ sats }}</div>
+        <div
+          :class="{ 'underline': !isTypingInFiat }"
+          @click="isTypingInFiat = false; inputDigits = []"
+          class="text-3xl cursor-pointer"
+        >
+          {{ sats }}
+        </div>
       </div>
       <div class="text-center mb-4">
         <div>BRL</div>
-        <div class="text-3xl">{{ fiat }}</div>
+        <div
+          :class="{ 'underline': isTypingInFiat }"
+          @click="isTypingInFiat = true; inputDigits = []"
+          class="text-3xl cursor-pointer"
+        >
+          {{ fiat }}
+        </div>
       </div>
       <div class="keypad">
         <button
