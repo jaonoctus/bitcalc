@@ -216,8 +216,9 @@ function toggleCurrency(c: string) {
         </button>
       </div>
     </form>
-    <div class="text-center">
-      <span class="text-slate-500 text-sm">last price update: {{ updatedAt }}.</span>
+    <div class="text-center mt-5">
+      <p class="text-slate-500 text-sm">last price update: {{ updatedAt }}.<br>(from <a href="https://www.coingecko.com/" target="_blank" class="underline">CoinGecko</a>)</p>
+      <p class="text-slate-500 mt-5">made by <a href="https://github.com/jaonoctus/bitcalc" target="_blank" class="font-bold">jaonoctus</a></p>
     </div>
     </div>
   </main>
@@ -239,5 +240,9 @@ function toggleCurrency(c: string) {
   max-height: 6rem;
   border: 1px solid #30363d;
   padding: 1rem 2rem;
+}
+
+.keypad button:focus-visible {
+  outline: none;
 }
 </style>
