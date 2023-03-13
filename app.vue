@@ -144,7 +144,7 @@ async function fetchRates() {
 
       if (parsedCache) {
         if (dayjs(parsedCache.updatedAt).diff(new Date(), 'm') > -15) {
-          apiRatesData.value = localCache
+          apiRatesData.value = parsedCache
           updatedAt.value = dayjs(parsedCache.updatedAt).fromNow()
           isLoading.value = false
           hasError.value = false
