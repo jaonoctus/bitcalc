@@ -13,18 +13,21 @@ useHead({
     class: 'h-100'
   },
   bodyAttrs: {
-    class: 'h-100'
+    class: 'h-100 bg-slate-900'
   }
 })
 
-const {
-  data: apiRatesData,
-  pending: isLoading,
-  error: hasError
-} = await useLazyFetch('/api/rates')
-const rates = apiRatesData.value?.rates
+const apiRatesData = ref<any>(null)
+const isLoading = ref(true)
+const hasError = ref(false)
+const rates = computed(() => {
+  if (!apiRatesData.value) return null
+  return apiRatesData.value.rates
+})
 dayjs.extend(relativeTime)
-const updatedAt = ref(dayjs(apiRatesData.value?.updatedAt).fromNow())
+const updatedAt = computed(() => {
+  return dayjs(apiRatesData.value?.updatedAt).fromNow()
+})
 
 const isTypingInFiat = ref(false)
 
@@ -52,7 +55,9 @@ const sats = computed(() => {
 const currency = ref('brl')
 const currencies = ['brl', 'usd', 'eur']
 const currencySymbol = computed(() => {
-  return (rates as any)[currency.value].unit
+  if (!rates.value) return ''
+  if (!rates.value[currency.value]) return ''
+  return rates.value[currency.value].unit
 })
 
 const keypad = [
@@ -91,8 +96,8 @@ function updatePrice () {
     return
   }
 
-  if (rates) {
-    const fiatPrice = new BigNumber((rates as any)[currency.value].value)
+  if (rates.value) {
+    const fiatPrice = new BigNumber(rates.value[currency.value].value)
 
     if (isTypingInFiat.value) {
       fiatNumber.value = inputNumber.value
@@ -128,7 +133,12 @@ function toggleSats() {
   updatePrice()
 }
 
-onMounted(() => {
+function toggleCurrency(c: string) {
+  currency.value = c
+  updatePrice()
+}
+
+onMounted(async () => {
   window.addEventListener('keyup', (event: KeyboardEvent) => {
     let key = event.key
 
@@ -141,15 +151,27 @@ onMounted(() => {
     }
   })
 
-  setInterval(() => {
-    updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
-  }, 60000)
-})
+  // setInterval(() => {
+  //   updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
+  // }, 60000)
 
-function toggleCurrency(c: string) {
-  currency.value = c
-  updatePrice()
-}
+  if (process.client) {
+    const localCache = window.localStorage.getItem('rates')
+
+    if (localCache) {
+      apiRatesData.value = JSON.parse(localCache)
+      isLoading.value = false
+      hasError.value = false
+    } else {
+      const { data, pending, error } = await useFetch('/api/rates')
+      apiRatesData.value = data.value
+      isLoading.value = pending.value
+      hasError.value = !!error.value
+
+      window.localStorage.setItem('rates', JSON.stringify(apiRatesData.value))
+    }
+  }
+})
 </script>
 
 <template>
@@ -221,6 +243,9 @@ function toggleCurrency(c: string) {
       <p class="text-slate-500 mt-5">made by <a href="https://github.com/jaonoctus/bitcalc" target="_blank" class="font-bold">jaonoctus</a></p>
     </div>
     </div>
+  </main>
+  <main v-else class="grid h-screen place-items-center bg-slate-900 py-24 px-6 sm:py-32 lg:px-8">
+    <h1 class="text-white">loading...</h1>
   </main>
 </template>
 
