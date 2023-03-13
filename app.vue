@@ -25,9 +25,7 @@ const rates = computed(() => {
   return apiRatesData.value.rates
 })
 dayjs.extend(relativeTime)
-const updatedAt = computed(() => {
-  return dayjs(apiRatesData.value?.updatedAt).fromNow()
-})
+const updatedAt = ref()
 
 const isTypingInFiat = ref(false)
 
@@ -138,6 +136,33 @@ function toggleCurrency(c: string) {
   updatePrice()
 }
 
+async function fetchRates() {
+  if (process.client) {
+    const localCache = window.localStorage.getItem('rates')
+    if (localCache) {
+      const parsedCache = JSON.parse(localCache)
+
+      if (parsedCache) {
+        if (dayjs(parsedCache.updatedAt).diff(new Date(), 'm') > -15) {
+          apiRatesData.value = localCache
+          updatedAt.value = dayjs(parsedCache.updatedAt).fromNow()
+          isLoading.value = false
+          hasError.value = false
+          return
+        }
+      }
+    }
+
+    const { data, pending, error } = await useFetch('/api/rates')
+    apiRatesData.value = data.value
+    updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
+    isLoading.value = pending.value
+    hasError.value = !!error.value
+
+    window.localStorage.setItem('rates', JSON.stringify(apiRatesData.value))
+  }
+}
+
 onMounted(async () => {
   window.addEventListener('keyup', (event: KeyboardEvent) => {
     let key = event.key
@@ -151,26 +176,11 @@ onMounted(async () => {
     }
   })
 
-  // setInterval(() => {
-  //   updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
-  // }, 60000)
+  setInterval(() => {
+    updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
+  }, 60000)
 
-  if (process.client) {
-    const localCache = window.localStorage.getItem('rates')
-
-    if (localCache) {
-      apiRatesData.value = JSON.parse(localCache)
-      isLoading.value = false
-      hasError.value = false
-    } else {
-      const { data, pending, error } = await useFetch('/api/rates')
-      apiRatesData.value = data.value
-      isLoading.value = pending.value
-      hasError.value = !!error.value
-
-      window.localStorage.setItem('rates', JSON.stringify(apiRatesData.value))
-    }
-  }
+  await fetchRates()
 })
 </script>
 
