@@ -49,6 +49,12 @@ const sats = computed(() => {
   return satsNumber.value.toLocaleString(undefined, { maximumFractionDigits, minimumFractionDigits })
 })
 
+const currency = ref('brl')
+const currencies = ['brl', 'usd', 'eur']
+const currencySymbol = computed(() => {
+  return (rates as any)[currency.value].unit
+})
+
 const keypad = [
   '1',
   '2',
@@ -86,7 +92,7 @@ function updatePrice () {
   }
 
   if (rates) {
-    const fiatPrice = new BigNumber(rates.brl.value)
+    const fiatPrice = new BigNumber((rates as any)[currency.value].value)
 
     if (isTypingInFiat.value) {
       fiatNumber.value = inputNumber.value
@@ -139,6 +145,11 @@ onMounted(() => {
     updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
   }, 60000)
 })
+
+function toggleCurrency(c: string) {
+  currency.value = c
+  updatePrice()
+}
 </script>
 
 <template>
@@ -177,13 +188,22 @@ onMounted(() => {
         </div>
       </div>
       <div class="text-center mb-4">
-        <div>BRL</div>
+        <div class="flex justify-center gap-2 mb-4">
+          <button
+            v-for="c in currencies"
+            :class="{ 'bg-orange-400 text-slate-900 border-slate-700': c === currency }"
+            @click.prevent="() => toggleCurrency(c)"
+            class="px-4 border rounded-full uppercase"
+          >
+            {{ c }}
+          </button>
+        </div>
         <div
           :class="{ 'underline': isTypingInFiat }"
           @click="isTypingInFiat = true; inputDigits = []"
           class="text-3xl cursor-pointer"
         >
-          {{ fiat }}
+          <span>{{ currencySymbol }}</span> {{ fiat }}
         </div>
       </div>
       <div class="keypad">
@@ -196,8 +216,9 @@ onMounted(() => {
         </button>
       </div>
     </form>
-    <div class="text-center">
-      <span class="text-slate-500 text-sm">last price update: {{ updatedAt }}.</span>
+    <div class="text-center mt-5">
+      <p class="text-slate-500 text-sm">last price update: {{ updatedAt }}.<br>(from <a href="https://www.coingecko.com/" target="_blank" class="underline">CoinGecko</a>)</p>
+      <p class="text-slate-500 mt-5">made by <a href="https://github.com/jaonoctus/bitcalc" target="_blank" class="font-bold">jaonoctus</a></p>
     </div>
     </div>
   </main>
@@ -219,5 +240,9 @@ onMounted(() => {
   max-height: 6rem;
   border: 1px solid #30363d;
   padding: 1rem 2rem;
+}
+
+.keypad button:focus-visible {
+  outline: none;
 }
 </style>
