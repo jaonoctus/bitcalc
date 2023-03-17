@@ -163,7 +163,7 @@ async function fetchRates() {
   }
 }
 
-onMounted(async () => {
+function listenKeyboard() {
   window.addEventListener('keyup', (event: KeyboardEvent) => {
     let key = event.key
 
@@ -175,6 +175,27 @@ onMounted(async () => {
       onKey(key)
     }
   })
+}
+
+function listenClipboard() {
+  window.addEventListener('paste', (event) => {
+    event.preventDefault()
+
+    const { clipboardData } = event as ClipboardEvent
+
+    if (clipboardData) {
+      const text = clipboardData.getData('text')
+      satsNumber.value = 0
+      fiatNumber.value = 0
+      inputDigits.value = []
+      text.split('').forEach(onKey)
+    }
+  })
+}
+
+onMounted(async () => {
+  listenKeyboard()
+  listenClipboard()
 
   setInterval(() => {
     updatedAt.value = dayjs(apiRatesData.value?.updatedAt).fromNow()
