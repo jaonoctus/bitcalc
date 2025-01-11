@@ -55,6 +55,12 @@ const currencySymbol = computed(() => {
   if (!rates.value[currency.value]) return ''
   return rates.value[currency.value].unit
 })
+const currentCurrencyQuote = computed(() => {
+  if (!rates.value[currency.value]) {
+    return ''
+  }
+  return (new BigNumber(rates.value[currency.value].value)).toNumber().toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+})
 
 const keypad = [
   '1',
@@ -270,6 +276,7 @@ onMounted(async () => {
         </div>
       </form>
       <div class="text-center mt-5">
+        <p class="text-slate-500 text-sm">1 BTC = {{ currencySymbol }} {{ currentCurrencyQuote }}</p>
         <p class="text-slate-500 text-sm">last price update: {{ updatedAt }}.<br>(from <a href="https://www.coingecko.com/" target="_blank" class="underline">CoinGecko</a>)</p>
         <p class="text-slate-500 mt-5">made by <a href="https://github.com/jaonoctus/bitcalc" target="_blank" class="font-bold">jaonoctus</a></p>
       </div>
