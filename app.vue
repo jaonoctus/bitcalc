@@ -49,7 +49,7 @@ const sats = computed(() => {
 })
 
 const currency = ref('brl')
-const currencies = ['brl', 'usd', 'eur']
+const currencies = ['brl', 'usd', 'eur', 'aed']
 const currencySymbol = computed(() => {
   if (!rates.value) return ''
   if (!rates.value[currency.value]) return ''
