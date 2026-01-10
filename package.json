@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "bitcalc",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,15 +10,15 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxtjs/tailwindcss": "6.12.2",
+    "@nuxtjs/tailwindcss": "6.14.0",
     "@upstash/redis": "1.34.3",
-    "bignumber.js": "9.1.2",
-    "luxon": "3.5.0",
-    "nuxt": "^3.14.1592",
+    "bignumber.js": "9.3.1",
+    "luxon": "3.7.2",
+    "nuxt": "^4.2.2",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
-    "@types/luxon": "3.4.2"
+    "@types/luxon": "3.7.1"
   }
 }
