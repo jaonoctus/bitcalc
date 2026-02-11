@@ -14,7 +14,7 @@
     "@upstash/redis": "1.36.2",
     "bignumber.js": "9.3.1",
     "luxon": "3.7.2",
-    "nuxt": "^4.3.0",
+    "nuxt": "^4.3.1",
     "vue": "latest",
     "vue-router": "latest"
   },
