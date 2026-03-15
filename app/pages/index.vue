@@ -280,7 +280,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
               ref="exprInputRef"
               v-model="expression"
               type="text"
-              inputmode="decimal"
+              inputmode="none"
               class="flex-1 min-w-0 bg-transparent text-right text-[0.8rem] text-[#6b5e48] focus:text-[#9a8a6e] focus:outline-none placeholder-[#3d3528] tracking-wide font-mono transition-colors"
               :placeholder="activeField === 'btc' ? 'type or use buttons' : 'type fiat or use buttons'"
               autocomplete="off"
