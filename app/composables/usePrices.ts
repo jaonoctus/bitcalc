@@ -36,7 +36,7 @@ export function usePrices() {
 
   onMounted(async () => {
     const cache = readCache()
-    const age = cache ? Date.now() - cache.cachedAt : Infinity
+    const age = cache ? Date.now() - new Date(cache.data.fetchedAt).getTime() : Infinity
 
     if (cache && age < CACHE_TTL) {
       data.value = cache.data
