@@ -16,7 +16,12 @@ const priceUpdatedAt = computed(() =>
 const activeField = ref<'btc' | 'fiat'>('btc')
 const expression = ref('')
 const unit = ref<'sat' | 'btc'>('sat')
-const currency = ref<Currency>('USD')
+const CURRENCY_KEY = 'bitcalc:currency'
+const storedCurrency = import.meta.client ? localStorage.getItem(CURRENCY_KEY) : null
+const currency = ref<Currency>(
+  CURRENCIES.includes(storedCurrency as Currency) ? (storedCurrency as Currency) : 'USD',
+)
+watch(currency, (val) => { if (import.meta.client) localStorage.setItem(CURRENCY_KEY, val) })
 const justEvaluated = ref(false)
 const copiedBtc = ref(false)
 const copiedFiat = ref(false)
