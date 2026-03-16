@@ -216,7 +216,8 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
 
       <!-- Price footnote -->
       <div class="text-center text-[#4a4236] text-[0.625rem] tracking-[0.18em] mt-3 font-mono space-y-0.5">
-        <p>1 BTC = {{ SYMBOLS[currency] }}{{ (prices[currency] ?? 0).toLocaleString('en-US') }}</p>
+        <p v-if="!bip177">1 BTC = {{ SYMBOLS[currency] }}{{ (prices[currency] ?? 0).toLocaleString('en-US') }}</p>
+        <p v-else>100,000,000 BTC = {{ SYMBOLS[currency] }}{{ (prices[currency] ?? 0).toLocaleString('en-US') }}</p>
         <p>last price update: {{ timeAgo }}</p>
         <p>made by <a href="https://jaonoctus.dev" target="_blank" rel="noopener" class="underline underline-offset-2">jaonoctus</a> with <span class="text-[#7a3832]">love</span></p>
       </div>
