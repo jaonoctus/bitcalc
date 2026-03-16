@@ -15,5 +15,6 @@
 
   * {
     box-sizing: border-box;
+    @apply touch-manipulation;
   }
 }
