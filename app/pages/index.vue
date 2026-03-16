@@ -8,7 +8,7 @@ useHead({
         '@type': 'WebApplication',
         name: 'bitcalc',
         url: 'https://bitcalc.jaonoctus.dev',
-        description: 'Convert Bitcoin (BTC) and Satoshis to USD, EUR, BRL, AED and PYG with live prices.',
+        description: 'Convert Bitcoin (BTC) and Satoshis to USD, EUR, BRL, AED, PYG, INR and ILS with live prices.',
         applicationCategory: 'FinanceApplication',
         operatingSystem: 'Any',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
@@ -16,7 +16,7 @@ useHead({
     },
   ],
   meta: [
-    { name: 'keywords', content: 'bitcoin calculator, satoshi converter, BTC to USD, BTC to EUR, satoshi to dollar, bitcoin price, crypto calculator' },
+    { name: 'keywords', content: 'bitcoin calculator, satoshi converter, BTC to USD, BTC to EUR, BTC to INR, BTC to ILS, satoshi to dollar, bitcoin price, crypto calculator' },
   ],
 })
 </script>

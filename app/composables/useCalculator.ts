@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon'
 import BigNumber from 'bignumber.js'
 
-export const SYMBOLS: Record<string, string> = { USD: '$', EUR: '€', BRL: 'R$', AED: 'د.إ', PYG: '₲' }
-export const CURRENCIES = ['AED', 'BRL', 'EUR', 'PYG', 'USD'] as const
+export const SYMBOLS: Record<string, string> = { USD: '$', EUR: '€', BRL: 'R$', AED: 'د.إ', PYG: '₲', INR: '₹', ILS: '₪' }
+export const CURRENCIES = ['AED', 'BRL', 'EUR', 'ILS', 'INR', 'PYG', 'USD'] as const
 export type Currency = (typeof CURRENCIES)[number]
 
 export function useCalculator(options?: { bip177?: boolean }) {

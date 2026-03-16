@@ -2,7 +2,7 @@ import { coinbaseProvider } from '../utils/providers/coinbase'
 import type { PricesResponse } from '../utils/providers/types'
 import { cacheGet, cacheSet } from '../utils/cache'
 
-const CURRENCIES = ['AED', 'BRL', 'EUR', 'PYG', 'USD']
+const CURRENCIES = ['AED', 'BRL', 'EUR', 'ILS', 'INR', 'PYG', 'USD']
 const CACHE_KEY = 'bitcalc:prices'
 const CACHE_TTL = 5 * 60 // 5 minutes in seconds
 

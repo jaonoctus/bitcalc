@@ -17,19 +17,19 @@ export default defineNuxtConfig({
         { rel: 'canonical', href: 'https://bitcalc.jaonoctus.dev' },
       ],
       meta: [
-        { name: 'description', content: 'Convert Bitcoin (BTC) and Satoshis to USD, EUR, BRL, AED and PYG with live prices. Fast, free, no ads.' },
+        { name: 'description', content: 'Convert Bitcoin (BTC) and Satoshis to USD, EUR, BRL, AED, PYG, INR and ILS with live prices. Fast, free, no ads.' },
         { name: 'theme-color', content: '#f7931a' },
         // Open Graph
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://bitcalc.jaonoctus.dev' },
         { property: 'og:title', content: 'bitcalc — Bitcoin & Satoshi Calculator' },
-        { property: 'og:description', content: 'Convert Bitcoin (BTC) and Satoshis to USD, EUR, BRL, AED and PYG with live prices. Fast, free, no ads.' },
+        { property: 'og:description', content: 'Convert Bitcoin (BTC) and Satoshis to USD, EUR, BRL, AED, PYG, INR and ILS with live prices. Fast, free, no ads.' },
         { property: 'og:site_name', content: 'bitcalc' },
         // Twitter Card
         { name: 'twitter:card', content: 'summary' },
         { name: 'twitter:site', content: '@jaonoctus' },
         { name: 'twitter:title', content: 'bitcalc — Bitcoin & Satoshi Calculator' },
-        { name: 'twitter:description', content: 'Convert Bitcoin (BTC) and Satoshis to USD, EUR, BRL, AED and PYG with live prices. Fast, free, no ads.' },
+        { name: 'twitter:description', content: 'Convert Bitcoin (BTC) and Satoshis to USD, EUR, BRL, AED, PYG, INR and ILS with live prices. Fast, free, no ads.' },
       ],
     },
   },
