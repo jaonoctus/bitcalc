@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon'
+import BigNumber from 'bignumber.js'
 
 export const SYMBOLS: Record<string, string> = { USD: '$', EUR: '€', BRL: 'R$', AED: 'د.إ', PYG: '₲' }
 export const CURRENCIES = ['AED', 'BRL', 'EUR', 'PYG', 'USD'] as const
@@ -43,7 +44,7 @@ export function useCalculator(options?: { bip177?: boolean }) {
   })
 
   // ─── Safe expression evaluator ────────────────────────────────────────────
-  function safeEval(expr: string): number | null {
+  function safeEval(expr: string): BigNumber | null {
     const clean = expr.trim()
     if (!clean) return null
     if (!/^[\d\s+\-*/().]+$/.test(clean)) return null
@@ -51,7 +52,7 @@ export function useCalculator(options?: { bip177?: boolean }) {
       // eslint-disable-next-line no-new-func
       const result = new Function(`"use strict"; return (${clean})`)()
       if (typeof result !== 'number' || !isFinite(result) || isNaN(result)) return null
-      return result
+      return new BigNumber(result)
     }
     catch { return null }
   }
@@ -59,26 +60,29 @@ export function useCalculator(options?: { bip177?: boolean }) {
   // ─── Computed values ──────────────────────────────────────────────────────
   const parsedValue = computed(() => safeEval(expression.value))
 
-  const btcAmt = computed((): number | null => {
+  const btcAmt = computed((): BigNumber | null => {
     if (parsedValue.value === null) return null
+    const price = new BigNumber(prices.value[currency.value] ?? 1)
     if (activeField.value === 'btc') {
-      if (bip177) return parsedValue.value / 1e8
-      return unit.value === 'btc' ? parsedValue.value : parsedValue.value / 1e8
+      if (bip177) return parsedValue.value.div('1e8')
+      return unit.value === 'btc' ? parsedValue.value : parsedValue.value.div('1e8')
     }
-    return parsedValue.value / (prices.value[currency.value] ?? 1)
+    return parsedValue.value.div(price)
   })
 
-  const fiatAmt = computed((): number | null => {
+  const fiatAmt = computed((): BigNumber | null => {
     if (parsedValue.value === null) return null
     if (activeField.value === 'fiat') return parsedValue.value
     if (btcAmt.value === null) return null
-    return btcAmt.value * (prices.value[currency.value] ?? 1)
+    const price = new BigNumber(prices.value[currency.value] ?? 1)
+    return btcAmt.value.times(price)
   })
 
   // ─── Display formatters ───────────────────────────────────────────────────
   const btcDisplay = computed(() => {
     if (btcAmt.value === null) return '0'
-    if (bip177 || unit.value === 'sat') return Math.round(btcAmt.value * 1e8).toLocaleString('en-US')
+    if (bip177 || unit.value === 'sat')
+      return btcAmt.value.times('1e8').integerValue(BigNumber.ROUND_HALF_UP).toFormat(0)
     return parseFloat(btcAmt.value.toFixed(8)).toLocaleString('en-US', { maximumFractionDigits: 8 })
   })
 
@@ -86,11 +90,12 @@ export function useCalculator(options?: { bip177?: boolean }) {
     if (fiatAmt.value === null) return `${SYMBOLS[currency.value]}0.00`
     const sym = SYMBOLS[currency.value]
     const v = fiatAmt.value
-    if (v === 0) return `${sym}0.00`
-    if (Math.abs(v) >= 1e9) return `${sym}${(v / 1e9).toFixed(2)}B`
-    if (Math.abs(v) >= 1e6) return `${sym}${(v / 1e6).toFixed(2)}M`
-    if (Math.abs(v) > 0 && Math.abs(v) < 0.01) return `< ${sym}0.01`
-    return `${sym}${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    const absV = v.abs()
+    if (v.isZero()) return `${sym}0.00`
+    if (absV.isGreaterThanOrEqualTo('1e9')) return `${sym}${v.div('1e9').toFixed(2)}B`
+    if (absV.isGreaterThanOrEqualTo('1e6')) return `${sym}${v.div('1e6').toFixed(2)}M`
+    if (absV.isGreaterThan(0) && absV.isLessThan('0.01')) return `< ${sym}0.01`
+    return `${sym}${parseFloat(v.toFixed(2)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   })
 
   // ─── Button action handlers ───────────────────────────────────────────────
@@ -132,12 +137,12 @@ export function useCalculator(options?: { bip177?: boolean }) {
 
   function percent() {
     const v = safeEval(expression.value)
-    if (v !== null) { expression.value = (v / 100).toString(); justEvaluated.value = true }
+    if (v !== null) { expression.value = v.div(100).toFixed(); justEvaluated.value = true }
   }
 
   function equals() {
     const v = safeEval(expression.value)
-    if (v !== null) { expression.value = v.toString(); justEvaluated.value = true }
+    if (v !== null) { expression.value = v.toFixed(); justEvaluated.value = true }
     focusExpr()
   }
 
@@ -146,9 +151,10 @@ export function useCalculator(options?: { bip177?: boolean }) {
     if (activeField.value === 'btc') return
     const fiatRaw = safeEval(expression.value)
     if (fiatRaw !== null) {
-      const btcVal = fiatRaw / (prices.value[currency.value] ?? 1)
+      const price = new BigNumber(prices.value[currency.value] ?? 1)
+      const btcVal = fiatRaw.div(price)
       expression.value = (bip177 || unit.value === 'sat')
-        ? Math.round(btcVal * 1e8).toString()
+        ? btcVal.times('1e8').integerValue(BigNumber.ROUND_HALF_UP).toFixed(0)
         : parseFloat(btcVal.toFixed(8)).toString()
       justEvaluated.value = true
     }
@@ -160,8 +166,9 @@ export function useCalculator(options?: { bip177?: boolean }) {
     if (activeField.value === 'fiat') return
     const btcRaw = safeEval(expression.value)
     if (btcRaw !== null) {
-      const btcVal = (bip177 || unit.value === 'sat') ? btcRaw / 1e8 : btcRaw
-      expression.value = parseFloat((btcVal * (prices.value[currency.value] ?? 1)).toFixed(2)).toString()
+      const price = new BigNumber(prices.value[currency.value] ?? 1)
+      const btcVal = (bip177 || unit.value === 'sat') ? btcRaw.div('1e8') : btcRaw
+      expression.value = parseFloat(btcVal.times(price).toFixed(2)).toString()
       justEvaluated.value = true
     }
     activeField.value = 'fiat'
@@ -177,11 +184,11 @@ export function useCalculator(options?: { bip177?: boolean }) {
     const v = parsedValue.value
     if (unit.value === 'sat') {
       unit.value = 'btc'
-      if (v !== null) { expression.value = parseFloat((v / 1e8).toFixed(8)).toString(); justEvaluated.value = true }
+      if (v !== null) { expression.value = parseFloat(v.div('1e8').toFixed(8)).toString(); justEvaluated.value = true }
     }
     else {
       unit.value = 'sat'
-      if (v !== null) { expression.value = Math.round(v * 1e8).toString(); justEvaluated.value = true }
+      if (v !== null) { expression.value = v.times('1e8').integerValue(BigNumber.ROUND_HALF_UP).toFixed(0); justEvaluated.value = true }
     }
   }
 
@@ -189,7 +196,7 @@ export function useCalculator(options?: { bip177?: boolean }) {
   async function copyBtc() {
     if (btcAmt.value === null) return
     const text = (bip177 || unit.value === 'sat')
-      ? Math.round(btcAmt.value * 1e8).toString()
+      ? btcAmt.value.times('1e8').integerValue(BigNumber.ROUND_HALF_UP).toFixed(0)
       : parseFloat(btcAmt.value.toFixed(8)).toString()
     await navigator.clipboard.writeText(text).catch(() => {})
     copiedBtc.value = true
