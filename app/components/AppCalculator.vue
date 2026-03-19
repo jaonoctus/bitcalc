@@ -100,10 +100,9 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
             <input
               :value="btcDisplay"
               readonly
-              class="flex-1 min-w-0 bg-transparent text-right font-mono text-[2rem] font-light tracking-tight tabular-nums focus:outline-none cursor-text transition-colors"
+              tabindex="-1"
+              class="flex-1 min-w-0 bg-transparent text-right font-mono text-[2rem] font-light tracking-tight tabular-nums focus:outline-none pointer-events-none transition-colors"
               :class="activeField === 'btc' ? 'text-white' : 'text-[#7a6c5a]'"
-              title="Click to select, then copy"
-              @focus="(e) => (e.target as HTMLInputElement).select()"
             />
 
             <!-- Copy BTC button -->
@@ -150,10 +149,9 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
             <input
               :value="fiatDisplay"
               readonly
-              class="flex-1 min-w-0 bg-transparent text-right font-mono text-[1.25rem] font-light tracking-tight tabular-nums focus:outline-none cursor-text transition-colors"
+              tabindex="-1"
+              class="flex-1 min-w-0 bg-transparent text-right font-mono text-[1.25rem] font-light tracking-tight tabular-nums focus:outline-none pointer-events-none transition-colors"
               :class="activeField === 'fiat' ? 'text-white' : 'text-[#8a7c66]'"
-              title="Click to select, then copy"
-              @focus="(e) => (e.target as HTMLInputElement).select()"
             />
 
             <!-- Copy fiat button -->
