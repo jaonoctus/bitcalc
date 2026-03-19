@@ -26,6 +26,16 @@ export function useCalculator(options?: { bip177?: boolean }) {
   )
   watch(currency, (val) => { if (import.meta.client) localStorage.setItem(CURRENCY_KEY, val) })
   const justEvaluated = ref(false)
+  const savedExpr = ref<string | null>(null)
+  const savedExprConverted = ref<string | null>(null)
+  const savedField = ref<'btc' | 'fiat' | null>(null)
+  watch(expression, (val) => {
+    if (savedExprConverted.value !== null && val !== savedExprConverted.value) {
+      savedExpr.value = null
+      savedExprConverted.value = null
+      savedField.value = null
+    }
+  })
   const copiedBtc = ref(false)
   const copiedFiat = ref(false)
   const exprInputRef = ref<HTMLInputElement | null>(null)
@@ -61,18 +71,34 @@ export function useCalculator(options?: { bip177?: boolean }) {
   const parsedValue = computed(() => safeEval(expression.value))
 
   const btcAmt = computed((): BigNumber | null => {
-    if (parsedValue.value === null) return null
     const price = new BigNumber(prices.value[currency.value] ?? 1)
     if (activeField.value === 'btc') {
+      if (parsedValue.value === null) return null
       if (bip177) return parsedValue.value.div('1e8')
       return unit.value === 'btc' ? parsedValue.value : parsedValue.value.div('1e8')
     }
+    // fiat mode: use saved BTC expression for display if user hasn't edited fiat
+    if (savedField.value === 'btc' && savedExpr.value !== null) {
+      const saved = safeEval(savedExpr.value)
+      if (saved !== null) {
+        if (bip177) return saved.div('1e8')
+        return unit.value === 'btc' ? saved : saved.div('1e8')
+      }
+    }
+    if (parsedValue.value === null) return null
     return parsedValue.value.div(price)
   })
 
   const fiatAmt = computed((): BigNumber | null => {
-    if (parsedValue.value === null) return null
-    if (activeField.value === 'fiat') return parsedValue.value
+    if (activeField.value === 'fiat') {
+      if (parsedValue.value === null) return null
+      return parsedValue.value
+    }
+    // btc mode: use saved fiat expression for display if user hasn't edited btc
+    if (savedField.value === 'fiat' && savedExpr.value !== null) {
+      const saved = safeEval(savedExpr.value)
+      if (saved !== null) return saved
+    }
     if (btcAmt.value === null) return null
     const price = new BigNumber(prices.value[currency.value] ?? 1)
     return btcAmt.value.times(price)
@@ -155,30 +181,64 @@ export function useCalculator(options?: { bip177?: boolean }) {
   }
 
   // ─── Field switching ──────────────────────────────────────────────────────
+  function clearSaved() {
+    savedExpr.value = null
+    savedExprConverted.value = null
+    savedField.value = null
+  }
+
   function activateBtc() {
     if (activeField.value === 'btc') return
+    // restore original fiat expression if user hasn't edited
+    if (savedField.value === 'btc' && savedExpr.value !== null && expression.value === savedExprConverted.value) {
+      expression.value = savedExpr.value
+      justEvaluated.value = true
+      clearSaved()
+      activeField.value = 'btc'
+      focusExpr()
+      return
+    }
     const fiatRaw = safeEval(expression.value)
     if (fiatRaw !== null) {
       const price = new BigNumber(prices.value[currency.value] ?? 1)
       const btcVal = fiatRaw.div(price)
-      expression.value = (bip177 || unit.value === 'sat')
+      const converted = (bip177 || unit.value === 'sat')
         ? btcVal.times('1e8').integerValue(BigNumber.ROUND_HALF_UP).toFixed(0)
         : parseFloat(btcVal.toFixed(8)).toString()
+      savedExpr.value = expression.value
+      savedExprConverted.value = converted
+      savedField.value = 'fiat'
+      expression.value = converted
       justEvaluated.value = true
     }
+    else { clearSaved() }
     activeField.value = 'btc'
     focusExpr()
   }
 
   function activateFiat() {
     if (activeField.value === 'fiat') return
+    // restore original btc expression if user hasn't edited
+    if (savedField.value === 'fiat' && savedExpr.value !== null && expression.value === savedExprConverted.value) {
+      expression.value = savedExpr.value
+      justEvaluated.value = true
+      clearSaved()
+      activeField.value = 'fiat'
+      focusExpr()
+      return
+    }
     const btcRaw = safeEval(expression.value)
     if (btcRaw !== null) {
       const price = new BigNumber(prices.value[currency.value] ?? 1)
       const btcVal = (bip177 || unit.value === 'sat') ? btcRaw.div('1e8') : btcRaw
-      expression.value = parseFloat(btcVal.times(price).toFixed(2)).toString()
+      const converted = parseFloat(btcVal.times(price).toFixed(2)).toString()
+      savedExpr.value = expression.value
+      savedExprConverted.value = converted
+      savedField.value = 'btc'
+      expression.value = converted
       justEvaluated.value = true
     }
+    else { clearSaved() }
     activeField.value = 'fiat'
     focusExpr()
   }
