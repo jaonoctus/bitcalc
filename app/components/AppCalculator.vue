@@ -84,6 +84,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
             </template>
             <template v-else>
               <button
+                data-testid="unit-toggle"
                 class="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#141414] hover:bg-[#1c1c1c] transition-colors"
                 @click.stop="cycleUnit"
               >
@@ -98,6 +99,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
 
             <!-- BTC amount display -->
             <input
+              data-testid="btc-display"
               :value="btcDisplay"
               readonly
               tabindex="-1"
@@ -147,6 +149,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
 
             <!-- Fiat amount display -->
             <input
+              data-testid="fiat-display"
               :value="fiatDisplay"
               readonly
               tabindex="-1"
@@ -180,7 +183,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
           <!-- Row 1: C  ( )  ⌫  ÷ -->
           <button :class="btnCls('clr')" @click="clear">C</button>
           <button :class="btnCls('fn')" @click="paren">( )</button>
-          <button :class="btnCls('fn')" @click="backspace">
+          <button data-testid="btn-backspace" :class="btnCls('fn')" @click="backspace">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
               <path d="M21 5H10L3 12l7 7h11V5z" stroke-linecap="round" stroke-linejoin="round" />
               <path stroke-linecap="round" d="M16 9l-4 6m0-6l4 6" stroke-width="1.6" />
@@ -215,7 +218,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
 
       <!-- Price footnote -->
       <div class="text-center text-[#4a4236] text-[0.625rem] tracking-[0.18em] mt-3 font-mono space-y-0.5">
-        <p v-if="!bip177">1 BTC = {{ SYMBOLS[currency] }}{{ (prices[currency] ?? 0).toLocaleString('en-US') }}</p>
+        <p v-if="!bip177" data-testid="price-display">1 BTC = {{ SYMBOLS[currency] }}{{ (prices[currency] ?? 0).toLocaleString('en-US') }}</p>
         <p v-else>100,000,000 BTC = {{ SYMBOLS[currency] }}{{ (prices[currency] ?? 0).toLocaleString('en-US') }}</p>
         <p>last price update: {{ timeAgo }}</p>
         <p>made by <a href="https://jaonoctus.dev" target="_blank" rel="noopener" class="underline underline-offset-2">jaonoctus</a> with <span class="text-[#7a3832]">love</span></p>
