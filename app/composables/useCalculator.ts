@@ -45,7 +45,7 @@ export function useCalculator(options?: { bip177?: boolean }) {
 
   // ─── Safe expression evaluator ────────────────────────────────────────────
   function safeEval(expr: string): BigNumber | null {
-    const clean = expr.trim()
+    const clean = expr.trim().replace(/\b0+(\d)/g, '$1')
     if (!clean) return null
     if (!/^[\d\s+\-*/().]+$/.test(clean)) return null
     try {
