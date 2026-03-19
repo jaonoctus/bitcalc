@@ -7,7 +7,10 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test": "vitest",
+    "test:e2e": "vitest --project e2e",
+    "test:unit": "vitest --project nuxt"
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "6.14.0",
@@ -19,6 +22,13 @@
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
-    "@types/luxon": "3.7.1"
+    "@nuxt/test-utils": "4.0.0",
+    "@types/luxon": "3.7.1",
+    "@vitest/coverage-v8": "4.1.0",
+    "@vitest/ui": "4.1.0",
+    "@vue/test-utils": "2.4.6",
+    "happy-dom": "20.8.4",
+    "playwright-core": "1.58.2",
+    "vitest": "4.1.0"
   }
 }
