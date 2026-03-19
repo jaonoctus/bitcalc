@@ -109,6 +109,14 @@ export function useCalculator(options?: { bip177?: boolean }) {
     focusExpr()
   }
 
+  function paren() {
+    const expr = expression.value
+    const opens = (expr.match(/\(/g) || []).length
+    const closes = (expr.match(/\)/g) || []).length
+    const insertClose = opens > closes && expr && !/[+\-*/(]$/.test(expr)
+    digit(insertClose ? ')' : '(')
+  }
+
   function operator(op: string) {
     justEvaluated.value = false
     if (!expression.value) return
@@ -228,6 +236,8 @@ export function useCalculator(options?: { bip177?: boolean }) {
     else if (e.key === 'Backspace') { e.preventDefault(); backspace() }
     else if (e.key === 'Escape') { e.preventDefault(); clear() }
     else if (e.key === '%') { e.preventDefault(); percent() }
+    else if (e.key === '(') { e.preventDefault(); digit('(') }
+    else if (e.key === ')') { e.preventDefault(); digit(')') }
   }
 
   onMounted(() => window.addEventListener('keydown', onWindowKeydown))
@@ -239,7 +249,7 @@ export function useCalculator(options?: { bip177?: boolean }) {
     // computed
     prices, timeAgo, btcDisplay, fiatDisplay,
     // actions
-    digit, operator, decimal, clear, backspace, percent, equals,
+    digit, operator, decimal, clear, backspace, percent, equals, paren,
     activateBtc, activateFiat, cycleUnit,
     copyBtc, copyFiat, onExprKeydown,
   }

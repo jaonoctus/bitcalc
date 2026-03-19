@@ -8,7 +8,7 @@ const {
   prices, timeAgo, btcDisplay, fiatDisplay,
   digit, operator, decimal, clear, backspace, percent, equals,
   activateBtc, activateFiat, cycleUnit,
-  copyBtc, copyFiat, onExprKeydown,
+  copyBtc, copyFiat, onExprKeydown, paren,
 } = useCalculator({ bip177: props.bip177 })
 
 function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
@@ -179,8 +179,9 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
         <!-- ── Numpad ──────────────────────────────────────────────────── -->
         <div class="grid grid-cols-4 gap-px bg-[#111111]">
 
-          <!-- Row 1: C(wide)  ⌫  ÷ -->
-          <button :class="btnCls('clr') + ' col-span-2'" @click="clear">C</button>
+          <!-- Row 1: C  ( )  ⌫  ÷ -->
+          <button :class="btnCls('clr')" @click="clear">C</button>
+          <button :class="btnCls('fn')" @click="paren">( )</button>
           <button :class="btnCls('fn')" @click="backspace">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
               <path d="M21 5H10L3 12l7 7h11V5z" stroke-linecap="round" stroke-linejoin="round" />
@@ -207,7 +208,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
           <button :class="btnCls('n')" @click="digit('3')">3</button>
           <button :class="btnCls('op')" @click="operator('+')">+</button>
 
-          <!-- Row 5: 0  .  = -->
+          <!-- Row 5: 0(wide)  .  = -->
           <button :class="btnCls('n') + ' col-span-2'" @click="digit('0')">0</button>
           <button :class="btnCls('n')" @click="decimal">.</button>
           <button :class="btnCls('eq')" @click="equals">=</button>
