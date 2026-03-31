@@ -24,7 +24,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
   const variants: Record<string, string> = {
     n: 'bg-[#171717] hover:bg-[#1f1f1f] text-[#e0dbd2]',
     op: 'bg-[#191208] hover:bg-[#221a0b] text-[#f7931a]',
-    fn: 'bg-[#171717] hover:bg-[#1f1f1f] text-[#857870]',
+    fn: 'bg-[#171717] hover:bg-[#1f1f1f] text-[#c4a888]',
     eq: 'bg-[#f7931a] hover:bg-[#e88510] text-[#1a0f00] font-medium',
     clr: 'bg-[#171717] hover:bg-[#1f1f1f] text-[#f05050]',
   }
@@ -43,11 +43,11 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
             class="text-[#f7931a] text-[1.6rem] leading-none font-bold"
             style="text-shadow: 0 0 18px rgba(247,147,26,0.45), 0 0 36px rgba(247,147,26,0.2)"
           >₿</span>
-          <span class="font-display text-[#b0a898] text-[0.8rem] font-semibold tracking-[0.24em] uppercase">
+          <span class="font-display text-[#cec5b8] text-[0.8rem] font-semibold tracking-[0.24em] uppercase">
             bitcalc
           </span>
         </div>
-        <span class="text-[#504840] text-[0.65rem] tracking-widest font-mono">v2</span>
+        <span class="text-[#907868] text-[0.65rem] tracking-widest font-mono">v2</span>
       </div>
 
       <!-- Calculator panel -->
@@ -63,7 +63,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
               v-model="expression"
               type="text"
               inputmode="none"
-              class="flex-1 min-w-0 bg-transparent text-right text-[0.8rem] text-[#6b5e48] focus:text-[#9a8a6e] focus:outline-none placeholder-[#3d3528] tracking-wide font-mono transition-colors"
+              class="flex-1 min-w-0 bg-transparent text-right text-[0.8rem] text-[#a89070] focus:text-[#c4a880] focus:outline-none placeholder-[#7a6248] tracking-wide font-mono transition-colors"
               :placeholder="activeField === 'btc' ? 'type or use buttons' : 'type fiat or use buttons'"
               autocomplete="off"
               spellcheck="false"
@@ -88,10 +88,10 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
                 class="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#141414] hover:bg-[#1c1c1c] transition-colors"
                 @click.stop="cycleUnit"
               >
-                <span class="text-[#7a6c5a] text-[0.7rem] font-semibold tracking-widest font-mono">
+                <span class="text-[#b09878] text-[0.7rem] font-semibold tracking-widest font-mono">
                   {{ unit.toUpperCase() }}
                 </span>
-                <svg class="w-2 h-2 text-[#504840] mt-px" viewBox="0 0 10 6" fill="none">
+                <svg class="w-2 h-2 text-[#907868] mt-px" viewBox="0 0 10 6" fill="none">
                   <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </button>
@@ -104,7 +104,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
               readonly
               tabindex="-1"
               class="flex-1 min-w-0 bg-transparent text-right font-mono text-[2rem] font-light tracking-tight tabular-nums focus:outline-none pointer-events-none transition-colors"
-              :class="activeField === 'btc' ? 'text-white' : 'text-[#7a6c5a]'"
+              :class="activeField === 'btc' ? 'text-white' : 'text-[#b09878]'"
             />
 
             <!-- Copy BTC button -->
@@ -112,7 +112,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
               class="shrink-0 p-1.5 rounded-lg transition-colors"
               :class="copiedBtc
                 ? 'text-[#f7931a] bg-[#191208]'
-                : 'text-[#4a4236] hover:text-[#7a6c5a] hover:bg-[#141414]'"
+                : 'text-[#907868] hover:text-[#b09878] hover:bg-[#141414]'"
               :title="copiedBtc ? 'Copied!' : 'Copy value'"
               @click.stop="copyBtc"
             >
@@ -138,11 +138,11 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
             <div class="shrink-0 relative flex items-center" @click.stop>
               <select
                 v-model="currency"
-                class="appearance-none pl-2.5 pr-6 py-1.5 rounded-lg bg-[#141414] hover:bg-[#1c1c1c] text-[#7a6c5a] text-[0.7rem] font-semibold tracking-widest font-mono cursor-pointer transition-colors focus:outline-none"
+                class="appearance-none pl-2.5 pr-6 py-1.5 rounded-lg bg-[#141414] hover:bg-[#1c1c1c] text-[#b09878] text-[0.7rem] font-semibold tracking-widest font-mono cursor-pointer transition-colors focus:outline-none"
               >
                 <option v-for="c in CURRENCIES" :key="c" :value="c">{{ c }}</option>
               </select>
-              <svg class="pointer-events-none absolute right-2 w-2 h-2 text-[#504840]" viewBox="0 0 10 6" fill="none">
+              <svg class="pointer-events-none absolute right-2 w-2 h-2 text-[#907868]" viewBox="0 0 10 6" fill="none">
                 <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
@@ -154,7 +154,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
               readonly
               tabindex="-1"
               class="flex-1 min-w-0 bg-transparent text-right font-mono text-[1.25rem] font-light tracking-tight tabular-nums focus:outline-none pointer-events-none transition-colors"
-              :class="activeField === 'fiat' ? 'text-white' : 'text-[#8a7c66]'"
+              :class="activeField === 'fiat' ? 'text-white' : 'text-[#b89e84]'"
             />
 
             <!-- Copy fiat button -->
@@ -162,7 +162,7 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
               class="shrink-0 p-1.5 rounded-lg transition-colors"
               :class="copiedFiat
                 ? 'text-[#f7931a] bg-[#191208]'
-                : 'text-[#4a4236] hover:text-[#7a6c5a] hover:bg-[#141414]'"
+                : 'text-[#907868] hover:text-[#b09878] hover:bg-[#141414]'"
               :title="copiedFiat ? 'Copied!' : 'Copy value'"
               @click.stop="copyFiat"
             >
@@ -217,11 +217,11 @@ function btnCls(type: 'n' | 'op' | 'fn' | 'eq' | 'clr') {
       </div>
 
       <!-- Price footnote -->
-      <div class="text-center text-[#4a4236] text-[0.625rem] tracking-[0.18em] mt-3 font-mono space-y-0.5">
+      <div class="text-center text-[#907868] text-[0.625rem] tracking-[0.18em] mt-3 font-mono space-y-0.5">
         <p v-if="!bip177" data-testid="price-display">1 BTC = {{ SYMBOLS[currency] }}{{ (prices[currency] ?? 0).toLocaleString('en-US') }}</p>
         <p v-else>100,000,000 BTC = {{ SYMBOLS[currency] }}{{ (prices[currency] ?? 0).toLocaleString('en-US') }}</p>
         <p>last price update: {{ timeAgo }}</p>
-        <p>made by <a href="https://jaonoctus.dev" target="_blank" rel="noopener" class="underline underline-offset-2">jaonoctus</a> with <span class="text-[#7a3832]">love</span></p>
+        <p>made by <a href="https://jaonoctus.dev" target="_blank" rel="noopener" class="underline underline-offset-2">jaonoctus</a> with <span class="text-[#c86050]">love</span></p>
       </div>
     </div>
   </div>
