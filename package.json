@@ -27,7 +27,7 @@
     "@vitest/coverage-v8": "4.1.0",
     "@vitest/ui": "4.1.0",
     "@vue/test-utils": "2.4.6",
-    "happy-dom": "20.8.4",
+    "happy-dom": "20.8.9",
     "playwright-core": "1.58.2",
     "vitest": "4.1.0"
   }
