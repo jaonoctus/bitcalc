@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { defineComponent } from 'vue'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 
 const CACHE_KEY = 'bitcalc:prices'
@@ -11,6 +11,11 @@ const mockResponse = {
   fetchedAt: new Date().toISOString(),
 }
 
+// $fetch is a Nuxt auto-import, so it can't be swapped with vi.stubGlobal —
+// mock the endpoint it hits instead.
+const pricesHandler = vi.fn(() => mockResponse)
+registerEndpoint('/api/prices', pricesHandler)
+
 const TestComponent = defineComponent({
   setup: () => usePrices(),
   template: '<div />',
@@ -19,26 +24,23 @@ const TestComponent = defineComponent({
 describe('usePrices', () => {
   beforeEach(() => {
     localStorage.clear()
+    pricesHandler.mockClear()
+    pricesHandler.mockReturnValue(mockResponse)
   })
 
   afterEach(() => {
-    vi.unstubAllGlobals()
     vi.clearAllTimers()
   })
 
   it('fetches prices on mount when there is no cache', async () => {
-    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(mockResponse))
-
     const wrapper = await mountSuspended(TestComponent)
     await flushPromises()
 
-    expect($fetch).toHaveBeenCalledWith('/api/prices')
+    expect(pricesHandler).toHaveBeenCalledTimes(1)
     expect(wrapper.vm.data).toMatchObject({ prices: { USD: 50000 } })
   })
 
   it('writes the response to localStorage cache', async () => {
-    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(mockResponse))
-
     await mountSuspended(TestComponent)
     await flushPromises()
 
@@ -56,13 +58,10 @@ describe('usePrices', () => {
       JSON.stringify({ data: cachedData, cachedAt: Date.now() }),
     )
 
-    const mockFetch = vi.fn()
-    vi.stubGlobal('$fetch', mockFetch)
-
     const wrapper = await mountSuspended(TestComponent)
     await flushPromises()
 
-    expect(mockFetch).not.toHaveBeenCalled()
+    expect(pricesHandler).not.toHaveBeenCalled()
     expect(wrapper.vm.data).toMatchObject({ prices: { USD: 45000 } })
   })
 
@@ -74,13 +73,10 @@ describe('usePrices', () => {
       JSON.stringify({ data: staleData, cachedAt: Date.now() - 6 * 60 * 1000 }),
     )
 
-    const freshResponse = { ...mockResponse, prices: { USD: 50000 } }
-    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(freshResponse))
-
     const wrapper = await mountSuspended(TestComponent)
     await flushPromises()
 
-    expect($fetch).toHaveBeenCalledWith('/api/prices')
+    expect(pricesHandler).toHaveBeenCalledTimes(1)
     expect(wrapper.vm.data).toMatchObject({ prices: { USD: 50000 } })
   })
 
