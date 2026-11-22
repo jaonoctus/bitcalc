@@ -14,21 +14,30 @@
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "6.14.0",
-    "@upstash/redis": "1.37.0",
-    "bignumber.js": "10.0.2",
+    "@upstash/redis": "1.41.0",
+    "bignumber.js": "11.1.5",
     "luxon": "3.7.2",
     "nuxt": "^4.6.4",
     "vue": "^3.5.30",
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
-    "@nuxt/test-utils": "4.3.2",
-    "@types/luxon": "3.7.1",
-    "@vitest/coverage-v8": "5.0.5",
-    "@vitest/ui": "5.0.5",
-    "@vue/test-utils": "2.4.6",
+    "@nuxt/test-utils": "4.4.0",
+    "@types/luxon": "3.7.6",
+    "@vitest/coverage-v8": "5.1.1",
+    "@vitest/ui": "5.1.1",
+    "@vue/test-utils": "2.6.0",
     "happy-dom": "21.0.4",
-    "playwright-core": "1.58.2",
-    "vitest": "5.0.5"
+    "playwright-core": "1.65.1",
+    "vitest": "5.1.1"
+  },
+  "overrides": {
+    "archiver": {
+      "readdir-glob": "4.0.0"
+    },
+    "js-beautify": {
+      "editorconfig": "4.0.1",
+      "glob": "14.0.6"
+    }
   }
 }
